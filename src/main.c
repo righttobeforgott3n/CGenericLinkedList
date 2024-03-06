@@ -1,3 +1,7 @@
+/*
+ * Driver source to explicit the GenericLinkedList usage.
+ */
+
 #include "../include/IntLinkedList.h"
 #include <stdio.h>
 
@@ -12,7 +16,7 @@ int main() {
     addFirstIntLinkedList(intLinkedList, 69);
     addFirstIntLinkedList(intLinkedList, 69);
     removeFirstIntLinkedList(intLinkedList);
-    applyForEachIntLinkedList(intLinkedList, printInt);
+    forEachIntLinkedList(intLinkedList, printInt);
 
     freeIntLinkedList(intLinkedList);
     return 0;

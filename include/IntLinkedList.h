@@ -1,5 +1,5 @@
 /*
- *
+ * Driver header to explicit the GenericLinkedList usage.
  */
 
 #ifndef GENERICLINKEDLIST_INTLINKEDLIST_H
@@ -7,19 +7,6 @@
 
 #include "LinkedList.h"
 
-#define LINKEDLIST_INT_TYPE Int
-DEFINE_LINKEDLIST_T(LINKEDLIST_INT_TYPE, int);
-
-DEFINE_CALLOC_LINKEDLIST(Int)
-
-DEFINE_FREE_LINKEDLIST(Int, self)
-
-DEFINE_NEW_LINKEDLIST(Int, int)
-
-DEFINE_LINKEDLIST_ADD_FIRST(Int, self, int, item)
-
-DEFINE_LINKEDLIST_REMOVE_FIRST(Int, self, int)
-
-DEFINE_LINKEDLIST_FOREACH(Int, self, int, apply)
+GENERIC_LINKEDLIST_LIST(Int, int)
 
 #endif //GENERICLINKEDLIST_INTLINKEDLIST_H
