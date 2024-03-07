@@ -56,7 +56,7 @@
  */
 #define DEFINE_NEW_NODE(userType, itemType, itemParam, nextParam) \
     struct NODE_T(userType)* NEW_NODE_FUNCTION_NAME(userType) (itemType itemParam, struct NODE_T(userType)* nextParam) { \
-        struct NODE_T(userType)* newNode = allocate##userType##Node(); \
+        struct NODE_T(userType)* newNode = CALLOC_NODE_FUNCTION_NAME(userType)(); \
         newNode->item = itemParam; \
         newNode->next = nextParam; \
         return newNode; \
@@ -104,8 +104,8 @@
 #define DEFINE_FREE_LINKEDLIST(userType) \
     DEFINE_FREE_NODE(userType, self) \
     void FREE_LINKEDLIST_FUNCTION_NAME(userType) (struct LINKEDLIST_T(userType)* self) { \
-        for (struct NODE_T(userType)* currentNode = (void*)0; (currentNode = self->head->next);) { self->head->next = currentNode->next; free##userType##Node(currentNode); } \
-        free##userType##Node(self->head); \
+        for (struct NODE_T(userType)* currentNode = (void*)0; (currentNode = self->head->next);) { self->head->next = currentNode->next; FREE_NODE_FUNCTION_NAME(userType)(currentNode); } \
+        FREE_NODE_FUNCTION_NAME(userType)(self->head); \
         free(self); \
     }
 
@@ -124,7 +124,7 @@
     DEFINE_NEW_NODE(userType, itemType, item, next) \
     struct LINKEDLIST_T(userType)* NEW_LINKEDLIST_FUNCTION_NAME(userType) (void) { \
         struct LINKEDLIST_T(userType)* newLinkedList = CALLOC_LINKEDLIST_FUNCTION_NAME(userType)(); \
-        newLinkedList->head = new##userType##Node(0, 0); \
+        newLinkedList->head = NEW_NODE_FUNCTION_NAME(userType)(0, 0); \
         newLinkedList->size = 0; \
         return newLinkedList; \
     }
@@ -138,9 +138,9 @@
 /*
  * Define the following function: void ADD_FIRST_LINKEDLIST_FUNCTION_NAME(userType) (struct LINKEDLIST_T(userType)* selfParam, itemType itemParam).
  */
-#define DEFINE_LINKEDLIST_ADD_FIRST(userType, itemType) \
+#define DEFINE_ADD_FIRST_LINKEDLIST(userType, itemType) \
     void ADD_FIRST_LINKEDLIST_FUNCTION_NAME(userType) (struct LINKEDLIST_T(userType)* self, itemType item) { \
-        struct NODE_T(userType)* newNode = new##userType##Node(item, self->head->next); \
+        struct NODE_T(userType)* newNode = NEW_NODE_FUNCTION_NAME(userType)(item, self->head->next); \
         self->head->next = newNode; \
         self->size++; \
     }
@@ -154,14 +154,14 @@
 /*
  * Define the following function: itemType REMOVE_FIRST_LINKEDLIST_FUNCTION_NAME(userType) (struct LINKEDLIST_T(userType)* selfParam).
  */
-#define DEFINE_LINKEDLIST_REMOVE_FIRST(userType, itemType) \
+#define DEFINE_REMOVE_FIRST_LINKEDLIST(userType, itemType) \
     itemType REMOVE_FIRST_LINKEDLIST_FUNCTION_NAME(userType) (struct LINKEDLIST_T(userType)* self) { \
         itemType removedItem = 0; \
-        if (self->head->next) { \
+        if (self && self->head->next) { \
             struct NODE_T(userType)* nodeToRemove = self->head->next; \
             removedItem = nodeToRemove->item; \
             self->head->next = nodeToRemove->next; \
-            free##userType##Node(nodeToRemove); \
+            FREE_NODE_FUNCTION_NAME(userType)(nodeToRemove); \
             self->size--; \
         } \
         return removedItem; \
@@ -176,7 +176,7 @@
 /*
  * Defines a function with the following signature: void applyForEach##userType##LinkedList (struct LINKEDLIST_T(userType)* selfParam, void(*funcParam)(itemType)).
  */
-#define DEFINE_LINKEDLIST_FOREACH(userType, itemType) \
+#define DEFINE_FOREACH_LINKEDLIST(userType, itemType) \
     void FOREACH_LINKEDLIST_FUNCTION_NAME(userType) (struct LINKEDLIST_T(userType)* self, void(*apply)(itemType)) { \
         for (struct NODE_T(userType)* currentNode = self->head; (currentNode = currentNode->next);) { \
             apply(currentNode->item); \
@@ -184,16 +184,77 @@
     }
 
 /*
+ * Placeholder for LinkedList add function: add##userType##LinkedList .
+ */
+#define ADD_LINKEDLIST_FUNCTION_NAME(userType, itemType) \
+    add##userType##LinkedList
+
+/*
+ * Defines a function with the following signature: void ADD_LINKEDLIST_FUNCTION_NAME(userType, itemType) (struct LINKEDLIST_T(userType)* self, itemType item, size_t pos).
+ */
+#define DEFINE_ADD_LINKEDLIST(userType, itemType) \
+    void ADD_LINKEDLIST_FUNCTION_NAME(userType, itemType) (struct LINKEDLIST_T(userType)* self, itemType item, size_t pos) { \
+        if (self) { \
+            if (!pos) { \
+                ADD_FIRST_LINKEDLIST_FUNCTION_NAME(userType)(self, item); \
+            } else if (pos < self->size + 1) { \
+                struct NODE_T(userType)* currentNode = self->head; \
+                for (size_t i = 0; i < pos; i++) \
+                    if (currentNode->next) currentNode = currentNode->next; \
+                    else break; \
+                struct NODE_T(userType)* newNode = NEW_NODE_FUNCTION_NAME(userType)(item, (void*)0); \
+                if (currentNode->next) { \
+                    newNode->next = currentNode->next; \
+                } \
+                currentNode->next = newNode; \
+                self->size++; \
+            } \
+        } \
+    }
+
+/*
+ * Placeholder for LinkedList remove function: remove##userType##LinkedList .
+ */
+#define REMOVE_LINKEDLIST_FUNCTION_NAME(userType, itemType) \
+    remove##userType##LinkedList
+
+/*
+ * Defines a function with the following signature: itemType REMOVE_LINKEDLIST_FUNCTION_NAME(userType, itemType) (struct LINKEDLIST_T(userType)* self, size_t pos).
+ */
+#define DEFINE_REMOVE_LINKEDLIST(userType, itemType) \
+    itemType REMOVE_LINKEDLIST_FUNCTION_NAME(userType, itemType) (struct LINKEDLIST_T(userType)* self, size_t pos) { \
+        itemType removedItem = 0; \
+        if (self) { \
+            if (!pos) { \
+                removedItem = REMOVE_FIRST_LINKEDLIST_FUNCTION_NAME(userType)(self);\
+            } else if (pos < self->size) { \
+                struct NODE_T(userType)* currentNode = self->head; \
+                for (size_t i = 0; i < pos; i++) \
+                    if (currentNode->next) currentNode = currentNode->next; \
+                    else break; \
+                struct NODE_T(userType)* nodeToRemove = currentNode->next; \
+                removedItem = nodeToRemove->item;    \
+                currentNode->next = nodeToRemove->next; \
+                FREE_NODE_FUNCTION_NAME(userType)(nodeToRemove); \
+                self->size--; \
+            } \
+        } \
+        return removedItem; \
+    }
+
+/*
  *
  */
-#define GENERIC_LINKEDLIST_LIST(userType, itemType) \
-    DEFINE_LINKEDLIST_TYPE(userType, itemType);     \
-    DEFINE_CALLOC_LINKEDLIST(userType)              \
-    DEFINE_FREE_LINKEDLIST(userType)                \
-    DEFINE_NEW_LINKEDLIST(userType, itemType)       \
-    DEFINE_LINKEDLIST_ADD_FIRST(userType, itemType) \
-    DEFINE_LINKEDLIST_REMOVE_FIRST(userType, itemType) \
-    DEFINE_LINKEDLIST_FOREACH(userType, itemType)
+#define GENERIC_LINKEDLIST(userType, itemType) \
+    DEFINE_LINKEDLIST_TYPE(userType, itemType); \
+    DEFINE_CALLOC_LINKEDLIST(userType) \
+    DEFINE_FREE_LINKEDLIST(userType) \
+    DEFINE_NEW_LINKEDLIST(userType, itemType) \
+    DEFINE_ADD_FIRST_LINKEDLIST(userType, itemType) \
+    DEFINE_REMOVE_FIRST_LINKEDLIST(userType, itemType) \
+    DEFINE_FOREACH_LINKEDLIST(userType, itemType) \
+    DEFINE_ADD_LINKEDLIST(userType, itemType) \
+    DEFINE_REMOVE_LINKEDLIST(userType, itemType)
 
 // ******************* end LinkedList type *******************
 

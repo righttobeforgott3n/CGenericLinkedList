@@ -7,6 +7,6 @@
 
 #include "LinkedList.h"
 
-GENERIC_LINKEDLIST_LIST(Int, int)
+GENERIC_LINKEDLIST(Int, int)
 
 #endif //GENERICLINKEDLIST_INTLINKEDLIST_H
