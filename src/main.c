@@ -15,8 +15,9 @@ int main() {
     addFirstIntLinkedList(intLinkedList, 69);
     addFirstIntLinkedList(intLinkedList, 69);
     addFirstIntLinkedList(intLinkedList, 69);
-    addIntLinkedList(intLinkedList, 3, 5);
-    removeIntLinkedList(intLinkedList, 5);
+    addIntLinkedList(intLinkedList, 3, 0);
+    addIntLinkedList(intLinkedList, 4, 6);
+    removeIntLinkedList(intLinkedList, 6);
     //removeFirstIntLinkedList(intLinkedList);
     forEachIntLinkedList(intLinkedList, printInt);
 
